@@ -14,3 +14,5 @@ app.post('/usuarios', db.adicionaUsuario);
 app.put('/usuarios', db.atualizaUsuario);
 app.delete('/usuario/:id', db.deletaUsuario);
 app.get('/usuario/:id', db.buscaUsuario);
+app.post('/postagem/', db.cachePostagem);
+app.get('/postagem/:id', db.buscaPostagem);

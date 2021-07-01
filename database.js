@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+//postgres
+
 const {Client} = require('pg');
 const client = new Client({
     host: process.env.PG_HOST,
@@ -10,8 +12,23 @@ const client = new Client({
 });
 
 client.connect()
-    .then(()=> console.log('Conectado com o banco'))
+    .then(()=> console.log("Conectado com o postgres"))
     .catch(err => console.log(err.stack));
+
+//redis
+
+const redis = require("redis");
+
+const clientredis = redis.createClient({
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT
+});
+
+clientredis.on("connect", function(error){
+    console.log("Conectado com o redis");
+});
+
+//funcoes
 
 const listaUsuarios = (request, response) =>{
     client.query('SELECT * FROM usuarios', (error, results) => {
@@ -75,10 +92,35 @@ const buscaUsuario = (request, response) => {
         response.status(200).json(results.rows);
     });
 };
+
+
+const cachePostagem = (request, response) =>{
+    const {id,postagem} = request.body;
+    
+    clientredis.setex(id , 7200, postagem, function(err, resp){
+        if(err) throw err;
+        response.status(200).json([{ id: id, postagem: postagem }]);
+    }); 
+};
+
+const buscaPostagem = (request, response) =>{
+    const id = parseInt(request.params.id)
+    
+    clientredis.get(id, function(err, reply){
+        if(reply != null){
+            response.status(200).json([{ id: id, texto: reply}])
+        }else{
+            response.status(400).send({ menssagem:"A o texto escrito não foi encontrado"});
+        }
+    });
+};
+
 module.exports = {
     listaUsuarios,
     adicionaUsuario,
     atualizaUsuario,
     deletaUsuario,
-    buscaUsuario
+    buscaUsuario,
+    cachePostagem,
+    buscaPostagem
 };
