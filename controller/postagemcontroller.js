@@ -1,35 +1,9 @@
-require('dotenv').config();
-
-//postgres
-
-const {Client} = require('pg');
-const client = new Client({
-    host: process.env.PG_HOST,
-    port: process.env.PG_PORT,
-    database: process.env.PG_DATABASE,
-    user: process.env.PG_USER,
-    password: process.env.PG_PASSWORD
-});
-
-client.connect()
-    .then(()=> console.log("Conectado com o postgres"))
-    .catch(err => console.log(err.stack));
-
-//redis
-
-const redis = require("redis");
-
-const clientredis = redis.createClient({
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT
-});
-
-clientredis.on("connect", function(error){
-    console.log("Conectado com o redis");
-});
+const client = require("../database/postgres");
+const clientredis = require("../database/redis");
 
 //funcoes
 
+//busca lista de usuarios
 const listaUsuarios = (request, response) =>{
     client.query('SELECT * FROM usuarios', (error, results) => {
         if(error){
@@ -39,7 +13,8 @@ const listaUsuarios = (request, response) =>{
         response.status(200).json(results.rows);
     });
 }
-    
+
+//adiciona um novo usuario
 const adicionaUsuario = (request, response) =>{
     const {nome,email} = request.body;
     
@@ -52,7 +27,8 @@ const adicionaUsuario = (request, response) =>{
         response.status(200).send('Usuário adicionado com sucesso');
     });
 };
-    
+
+//edita informacoes de um usuario    
 const atualizaUsuario = (request, response) => {
         
     const { nome, email } = request.body;
@@ -68,7 +44,8 @@ const atualizaUsuario = (request, response) => {
         response.status(200).send('Usuário atualizado com sucesso');
     });
 };
-    
+
+//deleta um usuario    
 const deletaUsuario = (request, response) => {
     const id = parseInt(request.params.id)
       
@@ -81,6 +58,7 @@ const deletaUsuario = (request, response) => {
     });
 };
 
+//busca um usuario pelo id
 const buscaUsuario = (request, response) => {
     const id = parseInt(request.params.id)
       
@@ -93,7 +71,7 @@ const buscaUsuario = (request, response) => {
     });
 };
 
-
+//salva uma postagem no cache
 const cachePostagem = (request, response) =>{
     const {id,postagem} = request.body;
     
@@ -103,6 +81,7 @@ const cachePostagem = (request, response) =>{
     }); 
 };
 
+//recupera a postagem no cache
 const buscaPostagem = (request, response) =>{
     const id = parseInt(request.params.id)
     

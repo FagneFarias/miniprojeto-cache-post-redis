@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const app = express();
 app.use(express.json());
@@ -7,12 +9,12 @@ app.listen(port, ()=>{
     console.log(`App running on port ${port}.`);
 });
 
-const db = require('./database');
+const datab = require('./controller/postagemcontroller');
 
-app.get('/usuarios', db.listaUsuarios);
-app.post('/usuarios', db.adicionaUsuario);
-app.put('/usuarios', db.atualizaUsuario);
-app.delete('/usuario/:id', db.deletaUsuario);
-app.get('/usuario/:id', db.buscaUsuario);
-app.post('/postagem/', db.cachePostagem);
-app.get('/postagem/:id', db.buscaPostagem);
+app.get('/usuarios', datab.listaUsuarios);
+app.post('/usuarios', datab.adicionaUsuario);
+app.put('/usuarios', datab.atualizaUsuario);
+app.delete('/usuario/:id', datab.deletaUsuario);
+app.get('/usuario/:id', datab.buscaUsuario);
+app.post('/postagem/', datab.cachePostagem);
+app.get('/postagem/:id', datab.buscaPostagem);
