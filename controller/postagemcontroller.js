@@ -1,8 +1,9 @@
 const client = require("../database/postgres");
 const clientredis = require("../database/redis");
+const clientmongo = require("../database/mongo");
 
 //funcoes
-
+//postgres
 //busca lista de usuarios
 const listaUsuarios = (request, response) =>{
     client.query('SELECT * FROM usuarios', (error, results) => {
@@ -71,6 +72,7 @@ const buscaUsuario = (request, response) => {
     });
 };
 
+//redis
 //salva uma postagem no cache
 const cachePostagem = (request, response) =>{
     const {id,postagem} = request.body;
@@ -94,6 +96,55 @@ const buscaPostagem = (request, response) =>{
     });
 };
 
+//mongo
+//criando o objeto da postagem
+
+const criaPostagem =  async(request, response) =>{
+
+    const postagem = {
+        email: request.body.email,
+        titulo: request.body.titulo,
+        texto: request.body.texto,
+    
+    }
+
+    try{
+        const blog = clientmongo.db(`${process.env.MONGO_DATABASE}`).collection('post');
+
+        await blog.insertOne(postagem).then(() => {
+            response.send('Postagem realizada!');
+        }).catch((err) => {
+            response.send(err);
+        });
+    }
+    catch (err) {
+        response.send(err)
+    }
+}
+
+//buscando postagem no mongo
+const filtraPostagem = async (request, response) => {
+    try {
+
+        const person = clientmongo.db(`${process.env.MONGO_DATABASE}`).collection('post');
+
+        const filter = { email: request.params.email };
+        const post = [];
+
+        await person.find(filter).forEach(p => post.push(p));
+
+        if (post.length > 0) {
+            response.send(post);
+        }
+        else {
+            response.send('Nenhuma postagem encontrada');
+        }
+
+    } catch (err) {
+        response.send(err);
+    }
+}
+
 module.exports = {
     listaUsuarios,
     adicionaUsuario,
@@ -101,5 +152,7 @@ module.exports = {
     deletaUsuario,
     buscaUsuario,
     cachePostagem,
-    buscaPostagem
+    buscaPostagem,
+    criaPostagem,
+    filtraPostagem
 };

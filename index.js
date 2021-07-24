@@ -18,3 +18,5 @@ app.delete('/usuario/:id', datab.deletaUsuario);
 app.get('/usuario/:id', datab.buscaUsuario);
 app.post('/postagem/', datab.cachePostagem);
 app.get('/postagem/:id', datab.buscaPostagem);
+app.post('/postagem/criar/', datab.criaPostagem);
+app.get('/postagem/filtrar/:email', datab.filtraPostagem);
